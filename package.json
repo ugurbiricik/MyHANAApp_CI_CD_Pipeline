@@ -18,14 +18,18 @@
     "@sap/cds-dk": "^8"
   },
   "scripts": {
-    "start": "cds-serve"
+    "start": "cds watch --profile hybrid",
+    "start:cf": "cds serve --profile production"
   },
   "cds": {
     "requires": {
       "auth": "mocked",
       "cors": {
         "credentials": true,
-        "allowedOrigins": ["http://localhost:8080", "http://localhost:4004"]
+        "allowedOrigins": [
+          "http://localhost:8080",
+          "http://localhost:4004"
+        ]
       }
     },
     "sql": {

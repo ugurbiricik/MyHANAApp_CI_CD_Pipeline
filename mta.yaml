@@ -1,7 +1,7 @@
 _schema-version: 3.3.0
 ID: MyHANAApp
 version: 1.0.0
-description: "A simple CAP project."
+description: "A CAP project with UI5 integration."
 parameters:
   enable-parallel-deployments: true
 build-parameters:
@@ -12,6 +12,7 @@ build-parameters:
         - npx cds build --production
 
 modules:
+  # Backend (CAP Service) Module
   - name: MyHANAApp-srv
     type: nodejs
     path: gen/srv
@@ -29,12 +30,38 @@ modules:
       - name: MyHANAApp-auth
       - name: MyHANAApp-db
 
+  # Database Deployer Module
   - name: MyHANAApp-db-deployer
     type: hdb
     path: gen/db
     requires:
       - name: MyHANAApp-db
 
+  # UI5 Module (Build Dist for Deployment)
+  - name: MyHANAApp-ui
+    type: html5
+    path: uimodule
+    build-parameters:
+      builder: custom
+      commands:
+        - npm install
+        - npm run build
+      build-result: dist
+    requires:
+      - name: srv-api
+        group: destinations
+        properties:
+          name: srv-api
+          url: ~{srv-url}
+          forwardAuthToken: true
+      - name: sapui5
+        group: destinations
+        properties:
+          name: sapui5
+          url: https://ui5.sap.com
+          forwardAuthToken: false
+
+  # Approuter Module
   - name: MyHANAApp
     type: approuter.nodejs
     path: app/router
@@ -55,13 +82,9 @@ modules:
           name: sapui5
           url: https://ui5.sap.com
           forwardAuthToken: false
-    provides:
-      - name: app-api
-        properties:
-          app-protocol: ${protocol}
-          app-uri: ${default-uri}
 
 resources:
+  # XSUAA Authentication Service
   - name: MyHANAApp-auth
     type: org.cloudfoundry.managed-service
     parameters:
@@ -72,12 +95,14 @@ resources:
         xsappname: abics_ugur_cap_app
         tenant-mode: dedicated
 
+  # HANA HDI Container
   - name: MyHANAApp-db
     type: com.sap.xs.hdi-container
     parameters:
       service: hana
       service-plan: hdi-shared
 
+  # SAP UI5 HTML5 Repo Service
   - name: sapui5
     type: org.cloudfoundry.managed-service
     parameters:

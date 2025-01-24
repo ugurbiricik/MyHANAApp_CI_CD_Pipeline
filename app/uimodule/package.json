@@ -5,8 +5,8 @@
   "author": "SAP SE",
   "description": "UI5 Demo App - Walkthrough Tutorial",
   "scripts": {
-    "start": "ui5 serve -o index.html",
-    "build": "ui5 build --all --clean-dest",
+    "build": "ui5 build --config=ui5-deploy.yaml --all --clean-dest",
+    "start": "ui5 serve --config=ui5-local.yaml",
     "serve-dist": "ws --compress -d dist --open"
   },
   "devDependencies": {
