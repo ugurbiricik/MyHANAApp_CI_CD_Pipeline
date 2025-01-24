@@ -19,7 +19,10 @@ modules:
       readiness-health-check-type: http
       readiness-health-check-http-endpoint: /health
     build-parameters:
-      builder: npm
+      builder: custom
+      commands:
+        - npm install
+        - npx cds build --production
     provides:
       - name: srv-api # required by consumers of CAP services (e.g. approuter)
         properties:
