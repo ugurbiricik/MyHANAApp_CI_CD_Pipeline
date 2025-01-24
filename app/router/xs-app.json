@@ -1,6 +1,7 @@
 {
-  "xsappname": "myhanaapp",
-  "authenticationMethod": "route",
+  "xsappname": "abics_ugur_cap_app",
+  "tenant-mode": "dedicated",
+  "authenticationMethod": "none",
   "routes": [
     {
       "source": "^/odata/(.*)$",

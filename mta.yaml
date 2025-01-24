@@ -69,7 +69,7 @@ resources:
       service-plan: application
       path: ./xs-security.json
       config:
-        xsappname: myhanaapp
+        xsappname: abics_ugur_cap_app
         tenant-mode: dedicated
 
   - name: MyHANAApp-db
