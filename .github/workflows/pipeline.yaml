@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
     # 1. Kodu Checkout Et
@@ -31,10 +31,13 @@ jobs:
     # 5. Cloud Foundry CLI Kur
     - name: Install Cloud Foundry CLI
       run: |
-        sudo wget -q -O - "https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key" | sudo apt-key add -
-        echo "deb http://packages.cloudfoundry.org/stable binary/" | sudo tee /etc/apt/sources.list.d/cloudfoundry-cli.list
         sudo apt-get update
-        sudo apt-get install cf-cli
+        sudo apt-get install -y wget
+        wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | sudo apt-key add -
+        echo "deb https://packages.cloudfoundry.org/debian stable main" | sudo tee /etc/apt/sources.list.d/cloudfoundry-cli.list
+        sudo apt-get update
+        sudo apt-get install -y cf8-cli
+        cf --version
 
     # 6. Projeyi Build Et
     - name: Build Project
@@ -50,7 +53,7 @@ jobs:
         CF_PASSWORD: ${{ secrets.CF_PASSWORD }}
       run: |
         cf api $CF_API
-        cf login -u $CF_USER -p $CF_PASSWORD -o $CF_ORG -s $CF_SPACE
+        cf login -u $CF_USER -p $CF_PASSWORD -o "$CF_ORG" -s $CF_SPACE
 
     # 8. Uygulamayı Deploy Et
     - name: Deploy to Cloud Foundry
