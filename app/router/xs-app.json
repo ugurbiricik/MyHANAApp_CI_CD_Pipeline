@@ -1,6 +1,4 @@
 {
-  "xsappname": "abics_ugur_cap_app",
-  "tenant-mode": "dedicated",
   "authenticationMethod": "none",
   "routes": [
     {
