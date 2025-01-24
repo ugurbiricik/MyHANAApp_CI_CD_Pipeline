@@ -10,25 +10,25 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-    # 1. Kodu Checkout Et
+    
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    # 2. Node.js Kurulumu
+    
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '20.18.1' # Doğru Node.js versiyonu
+        node-version: '20.18.1' 
 
-    # 3. NPM Bağımlılıklarını Kur
+  
     - name: Install Dependencies
       run: npm install
 
-    # 4. mbt Aracını Kur
+ 
     - name: Install Multi-Target Build Tool
       run: npm install -g mbt
 
-    # 5. Cloud Foundry CLI Kur
+
     - name: Install Cloud Foundry CLI
       run: |
         sudo apt-get update
@@ -39,11 +39,16 @@ jobs:
         sudo apt-get install -y cf8-cli
         cf --version
 
-    # 6. Projeyi Build Et
+    - name: Install MultiApps Plugin
+      run: |
+        cf add-plugin-repo CF-Community https://plugins.cloudfoundry.org
+        cf install-plugin -f multiapps
+        cf plugins
+
+  
     - name: Build Project
       run: mbt build
 
-    # 7. Cloud Foundry'ye Login Ol
     - name: Login to Cloud Foundry
       env:
         CF_API: ${{ secrets.CF_API }}
@@ -55,6 +60,6 @@ jobs:
         cf api $CF_API
         cf login -u $CF_USER -p $CF_PASSWORD -o "$CF_ORG" -s $CF_SPACE
 
-    # 8. Uygulamayı Deploy Et
+    
     - name: Deploy to Cloud Foundry
       run: cf deploy mta_archives/*.mtar
