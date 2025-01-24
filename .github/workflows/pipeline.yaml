@@ -1,0 +1,57 @@
+name: CI/CD for SAP CAP Project
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Kodu Checkout Et
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    # 2. Node.js Kurulumu
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16' # Node.js versiyonu
+
+    # 3. NPM Bağımlılıklarını Kur
+    - name: Install Dependencies
+      run: npm install
+
+    # 4. mbt Aracını Kur
+    - name: Install Multi-Target Build Tool
+      run: npm install -g mbt
+
+    # 5. Cloud Foundry CLI Kur
+    - name: Install Cloud Foundry CLI
+      run: |
+        sudo wget -q -O - "https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key" | sudo apt-key add -
+        echo "deb http://packages.cloudfoundry.org/stable binary/" | sudo tee /etc/apt/sources.list.d/cloudfoundry-cli.list
+        sudo apt-get update
+        sudo apt-get install cf-cli
+
+    # 6. Projeyi Build Et
+    - name: Build Project
+      run: mbt build
+
+    # 7. Cloud Foundry'ye Login Ol
+    - name: Login to Cloud Foundry
+      env:
+        CF_API: ${{ secrets.CF_API }}
+        CF_ORG: ${{ secrets.CF_ORG }}
+        CF_SPACE: ${{ secrets.CF_SPACE }}
+        CF_USER: ${{ secrets.CF_USER }}
+        CF_PASSWORD: ${{ secrets.CF_PASSWORD }}
+      run: |
+        cf api $CF_API
+        cf login -u $CF_USER -p $CF_PASSWORD -o $CF_ORG -s $CF_SPACE
+
+    # 8. Uygulamayı Deploy Et
+    - name: Deploy to Cloud Foundry
+      run: cf deploy mta_archives/*.mtar

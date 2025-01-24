@@ -1,0 +1,88 @@
+_schema-version: 3.3.0
+ID: MyHANAApp
+version: 1.0.0
+description: "A simple CAP project."
+parameters:
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npm ci
+        - npx cds build --production
+
+modules:
+  - name: MyHANAApp-srv
+    type: nodejs
+    path: gen/srv
+    parameters:
+      buildpack: nodejs_buildpack
+      readiness-health-check-type: http
+      readiness-health-check-http-endpoint: /health
+    build-parameters:
+      builder: npm
+    provides:
+      - name: srv-api # Backend servisleri için tanımlama
+        properties:
+          srv-url: ${default-url}
+    requires:
+      - name: MyHANAApp-auth # xsuaa servisi bağlantısı
+      - name: MyHANAApp-db   # HANA HDI container bağlantısı
+
+  - name: MyHANAApp-db-deployer
+    type: hdb
+    path: gen/db
+    parameters:
+      buildpack: nodejs_buildpack
+    requires:
+      - name: MyHANAApp-db # Database bağlantısı
+
+  - name: MyHANAApp
+    type: approuter.nodejs
+    path: app/router
+    parameters:
+      keep-existing-routes: true
+      disk-quota: 256M
+      memory: 256M
+    requires:
+      - name: srv-api
+        group: destinations
+        properties:
+          name: srv-api # Backend servisi için proxy ayarı
+          url: ~{srv-url}
+          forwardAuthToken: true # Kullanıcı tokenını backend'e iletme
+      - name: MyHANAApp-auth # Authentication servisi bağlantısı
+      - name: sapui5 # SAP UI5 kütüphaneleri için bağlantı
+        group: destinations
+        properties:
+          name: sapui5
+          url: https://ui5.sap.com # SAP'nin CDN'ini kullanır
+          forwardAuthToken: false # UI5 kütüphaneleri için token gerekmez
+    provides:
+      - name: app-api
+        properties:
+          app-protocol: ${protocol}
+          app-uri: ${default-uri}
+
+resources:
+  - name: MyHANAApp-auth
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa # SAP XSUAA servisi kullanımı
+      service-plan: application
+      path: ./xs-security.json
+      config:
+        xsappname: MyHANAApp-${org}-${space}
+        tenant-mode: dedicated
+
+  - name: MyHANAApp-db
+    type: com.sap.xs.hdi-container
+    parameters:
+      service: hana
+      service-plan: hdi-shared
+
+  - name: sapui5
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo # SAP UI5 kütüphaneleri için gerekli servis
+      service-plan: app-runtime

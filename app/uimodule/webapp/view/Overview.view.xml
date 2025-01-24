@@ -1,0 +1,35 @@
+<mvc:View
+	controllerName="ui5.walkthrough.controller.App"
+	xmlns="sap.m"
+	xmlns:mvc="sap.ui.core.mvc"
+	displayBlock="true"
+>
+	<Page title="Overview Page">
+	<Table
+  id="itemsTable"
+  items="{/Interactions_Items}">
+  <columns>
+    <Column>
+      <Text text="Text" />
+    </Column>
+    <Column>
+      <Text text="Date" />
+    </Column>
+    <Column>
+      <Text text="Price" />
+    </Column>
+  </columns>
+  <items>
+    <ColumnListItem>
+      <cells>
+        <Text text="{text}" />
+        <Text text="{date}" />
+        <Text text="{price}" />
+      </cells>
+    </ColumnListItem>
+  </items>
+</Table>
+
+
+	</Page>
+</mvc:View>
