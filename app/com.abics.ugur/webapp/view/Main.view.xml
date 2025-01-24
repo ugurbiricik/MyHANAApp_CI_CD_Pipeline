@@ -1,9 +1,11 @@
 <mvc:View
-	controllerName="ui5.walkthrough.controller.App"
+	controllerName="com.abics.ugur.controller.Main"
+	displayBlock="true"
 	xmlns="sap.m"
 	xmlns:mvc="sap.ui.core.mvc"
-	displayBlock="true"
->
+	xmlns:core="sap.ui.core"
+	>
+
 	<Page title="Overview Page">
 	<Table
   id="itemsTable"
@@ -32,4 +34,5 @@
 
 
 	</Page>
+
 </mvc:View>

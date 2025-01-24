@@ -40,7 +40,9 @@ modules:
   # UI5 Module (Build Dist for Deployment)
   - name: MyHANAApp-ui
     type: html5
-    path: app/uimodule
+    path: com.abics.ugur
+    parameters:
+      buildpack: html5_buildpack
     build-parameters:
       builder: custom
       commands:
