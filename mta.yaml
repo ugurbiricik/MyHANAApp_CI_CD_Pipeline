@@ -1,7 +1,7 @@
 _schema-version: 3.3.0
 ID: MyHANAApp
 version: 1.0.0
-description: "A CAP project with UI5 integration."
+description: "A simple CAP project."
 parameters:
   enable-parallel-deployments: true
 build-parameters:
@@ -10,9 +10,7 @@ build-parameters:
       commands:
         - npm ci
         - npx cds build --production
-
 modules:
-  # Backend (CAP Service) Module
   - name: MyHANAApp-srv
     type: nodejs
     path: gen/srv
@@ -23,90 +21,43 @@ modules:
     build-parameters:
       builder: npm
     provides:
-      - name: srv-api
+      - name: srv-api # required by consumers of CAP services (e.g. approuter)
         properties:
           srv-url: ${default-url}
     requires:
-      - name: MyHANAApp-auth
       - name: MyHANAApp-db
 
-  # Database Deployer Module
-  - name: MyHANAApp-db-deployer
-    type: hdb
-    path: gen/db
-    requires:
-      - name: MyHANAApp-db
-
-  # UI5 Module (Build Dist for Deployment)
-  - name: MyHANAApp-ui
-    type: html5
-    path: app/com.abics.ugur
-    parameters:
-      buildpack: html5_buildpack
-    build-parameters:
-      builder: custom
-      commands:
-        - npm install
-        - npm run build
-      build-result: dist
-    requires:
-      - name: srv-api
-        group: destinations
-        properties:
-          name: srv-api
-          url: ~{srv-url}
-          forwardAuthToken: true
-      - name: sapui5
-        group: destinations
-        properties:
-          name: sapui5
-          url: https://ui5.sap.com
-          forwardAuthToken: false
-
-  # Approuter Module
   - name: MyHANAApp
     type: approuter.nodejs
     path: app/router
     parameters:
+      keep-existing-routes: true
       disk-quota: 256M
       memory: 256M
     requires:
       - name: srv-api
         group: destinations
         properties:
-          name: srv-api
+          name: srv-api # must be used in xs-app.json as well
           url: ~{srv-url}
           forwardAuthToken: true
-      - name: MyHANAApp-auth
-      - name: sapui5
-        group: destinations
+    provides:
+      - name: app-api
         properties:
-          name: sapui5
-          url: https://ui5.sap.com
-          forwardAuthToken: false
+          app-protocol: ${protocol}
+          app-uri: ${default-uri}
+
+  - name: MyHANAApp-db-deployer
+    type: hdb
+    path: gen/db
+    parameters:
+      buildpack: nodejs_buildpack
+    requires:
+      - name: MyHANAApp-db
 
 resources:
-  # XSUAA Authentication Service
-  - name: MyHANAApp-auth
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: xsuaa
-      service-plan: application
-      path: ./xs-security.json
-      config:
-        xsappname: abics_ugur_cap_app
-        tenant-mode: dedicated
-
-  # HANA HDI Container
   - name: MyHANAApp-db
     type: com.sap.xs.hdi-container
     parameters:
       service: hana
       service-plan: hdi-shared
-
-  # SAP UI5 HTML5 Repo Service
-  - name: sapui5
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: html5-apps-repo
-      service-plan: app-runtime
