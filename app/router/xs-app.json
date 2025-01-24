@@ -1,4 +1,6 @@
 {
+  "xsappname": "myhanaapp",
+  "tenant-mode":"dedicated",
   "authenticationMethod": "none",
   "routes": [
     {

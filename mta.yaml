@@ -69,7 +69,7 @@ resources:
       service-plan: application
       path: ./xs-security.json
       config:
-        xsappname: MyHANAApp-${org}-${space}
+        xsappname: myhanaapp
         tenant-mode: dedicated
 
   - name: MyHANAApp-db
