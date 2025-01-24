@@ -60,12 +60,5 @@ jobs:
         cf api $CF_API
         cf login -u $CF_USER -p $CF_PASSWORD -o "$CF_ORG" -s $CF_SPACE
 
-    - name: Abort Existing Deployments
-      run: |
-        ongoing_deployments=$(cf deployments | grep -i <your-app-name>)
-        if [ -n "$ongoing_deployments" ]; then
-          cf abort-deploy $(echo $ongoing_deployments | awk '{print $1}')
-        fi
-
     - name: Deploy to Cloud Foundry
       run: cf deploy mta_archives/*.mtar
