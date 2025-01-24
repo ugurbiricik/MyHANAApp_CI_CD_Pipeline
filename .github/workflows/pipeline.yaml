@@ -61,4 +61,4 @@ jobs:
         cf login -u $CF_USER -p $CF_PASSWORD -o "$CF_ORG" -s $CF_SPACE
 
     - name: Deploy to Cloud Foundry
-      run: cf deploy mta_archives/*.mtar --abort-on-error --force
+      run: echo "y" | cf deploy mta_archives/*.mtar
